@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description"
+        content="Supplementary material for an anonymous submission: learned differentiable physics for planning with and designing deformable-manipulation tools.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learned Differentiable Physics for Deformable-Manipulation Tools</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <div class="tags is-centered" style="margin-bottom: 1rem;">
+            <span class="tag is-dark is-medium">Anonymous Submission</span>
+          </div>
+          <h1 class="title is-2 publication-title">Learned Differentiable Physics for Planning with and Designing Deformable-Manipulation Tools</h1>
+          <div class="is-size-5 publication-authors" style="margin-top: 1rem;">
+            <span class="author-block">Anonymous Authors</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top: 0;">
+  <div class="container is-max-desktop">
+    <div class="content has-text-justified">
+      <p>
+        We learn a dynamics model for deformable object manipulation directly from real robot
+        RGB-D data. A single graph neural network is trained on nine tools spanning three
+        interaction modes (grippers, rollers, and presses), using the real-robot dataset from
+        <a href="https://arxiv.org/abs/2306.14447">RoboCook</a>. Its feature parameterization is
+        rotation- and particle-density-invariant by construction, which lets it generalize to new
+        tools and new manipulation trajectories. Because the model is differentiable, it can also
+        design a tool, or plan the motion of up to four grippers, to reach a target dough shape.
+      </p>
+    </div>
+    <img src="./static/images/overview.png" alt="Method overview: a raw RGB-D point cloud, a GNN dynamics model trained on grippers, rollers and presses, zero-shot generalization to unseen tools, and tool shape optimization">
+    <div class="content toc">
+      <ul>
+        <li><a href="#rollouts">Rollouts on all nine tools</a></li>
+        <li><a href="#comparison">Comparison on unseen tools</a></li>
+        <li><a href="#new-geometries">Zero-shot generalization to new tool geometries</a></li>
+        <li><a href="#tool-design">Tool shape design</a></li>
+        <li><a href="#planning">Gradient-based vs. sampling-based planning</a></li>
+        <li><a href="#quantitative">Quantitative results</a></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="rollouts">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3">Rollouts on all nine tools</h2>
+    <div class="content has-text-justified">
+      <p>One model trained on all nine tools, rolled out on a held-out test trajectory of each. Left to right are the model's six predicted states, about 1.5&nbsp;s apart; each blue sphere is one predicted dough particle and the tool is shown in red. The presses and punches reach the dough only in the final step.</p>
+    </div>
+    <div class="snapshot-strip snapshot-times">
+      <span>0 s</span>
+      <span>1.5 s</span>
+      <span>3.0 s</span>
+      <span>4.5 s</span>
+      <span>6.0 s</span>
+      <span>7.5 s</span>
+    </div>
+    <h3 class="title is-5">Grippers</h3>
+    <p class="snapshot-label">Gripper Symmetric Plane</p>
+    <div class="snapshot-strip">
+      <img src="./static/images/snapshots/gsp_0.jpg" alt="Gripper Symmetric Plane, predicted state 1 of 6" loading="lazy">
+      <img src="./static/images/snapshots/gsp_1.jpg" alt="Gripper Symmetric Plane, predicted state 2 of 6" loading="lazy">
+      <img src="./static/images/snapshots/gsp_2.jpg" alt="Gripper Symmetric Plane, predicted state 3 of 6" loading="lazy">
+      <img src="./static/images/snapshots/gsp_3.jpg" alt="Gripper Symmetric Plane, predicted state 4 of 6" loading="lazy">
+      <img src="./static/images/snapshots/gsp_4.jpg" alt="Gripper Symmetric Plane, predicted state 5 of 6" loading="lazy">
+      <img src="./static/images/snapshots/gsp_5.jpg" alt="Gripper Symmetric Plane, predicted state 6 of 6" loading="lazy">
+    </div>
+    <p class="snapshot-label">Gripper Symmetric Rod</p>
+    <div class="snapshot-strip">
+      <img src="./static/images/snapshots/gsr_0.jpg" alt="Gripper Symmetric Rod, predicted state 1 of 6" loading="lazy">
+      <img src="./static/images/snapshots/gsr_1.jpg" alt="Gripper Symmetric Rod, predicted state 2 of 6" loading="lazy">
+      <img src="./static/images/snapshots/gsr_2.jpg" alt="Gripper Symmetric Rod, predicted state 3 of 6" loading="lazy">
+      <img src="./static/images/snapshots/gsr_3.jpg" alt="Gripper Symmetric Rod, predicted state 4 of 6" loading="lazy">
+      <img src="./static/images/snapshots/gsr_4.jpg" alt="Gripper Symmetric Rod, predicted state 5 of 6" loading="lazy">
+      <img src="./static/images/snapshots/gsr_5.jpg" alt="Gripper Symmetric Rod, predicted state 6 of 6" loading="lazy">
+    </div>
+    <p class="snapshot-label">Gripper Asymmetric</p>
+    <div class="snapshot-strip">
+      <img src="./static/images/snapshots/ga_0.jpg" alt="Gripper Asymmetric, predicted state 1 of 6" loading="lazy">
+      <img src="./static/images/snapshots/ga_1.jpg" alt="Gripper Asymmetric, predicted state 2 of 6" loading="lazy">
+      <img src="./static/images/snapshots/ga_2.jpg" alt="Gripper Asymmetric, predicted state 3 of 6" loading="lazy">
+      <img src="./static/images/snapshots/ga_3.jpg" alt="Gripper Asymmetric, predicted state 4 of 6" loading="lazy">
+      <img src="./static/images/snapshots/ga_4.jpg" alt="Gripper Asymmetric, predicted state 5 of 6" loading="lazy">
+      <img src="./static/images/snapshots/ga_5.jpg" alt="Gripper Asymmetric, predicted state 6 of 6" loading="lazy">
+    </div>
+    <h3 class="title is-5">Rollers</h3>
+    <p class="snapshot-label">Roller Large</p>
+    <div class="snapshot-strip">
+      <img src="./static/images/snapshots/rl_0.jpg" alt="Roller Large, predicted state 1 of 6" loading="lazy">
+      <img src="./static/images/snapshots/rl_1.jpg" alt="Roller Large, predicted state 2 of 6" loading="lazy">
+      <img src="./static/images/snapshots/rl_2.jpg" alt="Roller Large, predicted state 3 of 6" loading="lazy">
+      <img src="./static/images/snapshots/rl_3.jpg" alt="Roller Large, predicted state 4 of 6" loading="lazy">
+      <img src="./static/images/snapshots/rl_4.jpg" alt="Roller Large, predicted state 5 of 6" loading="lazy">
+      <img src="./static/images/snapshots/rl_5.jpg" alt="Roller Large, predicted state 6 of 6" loading="lazy">
+    </div>
+    <p class="snapshot-label">Roller Small</p>
+    <div class="snapshot-strip">
+      <img src="./static/images/snapshots/rs_0.jpg" alt="Roller Small, predicted state 1 of 6" loading="lazy">
+      <img src="./static/images/snapshots/rs_1.jpg" alt="Roller Small, predicted state 2 of 6" loading="lazy">
+      <img src="./static/images/snapshots/rs_2.jpg" alt="Roller Small, predicted state 3 of 6" loading="lazy">
+      <img src="./static/images/snapshots/rs_3.jpg" alt="Roller Small, predicted state 4 of 6" loading="lazy">
+      <img src="./static/images/snapshots/rs_4.jpg" alt="Roller Small, predicted state 5 of 6" loading="lazy">
+      <img src="./static/images/snapshots/rs_5.jpg" alt="Roller Small, predicted state 6 of 6" loading="lazy">
+    </div>
+    <h3 class="title is-5">Presses</h3>
+    <p class="snapshot-label">Press Square</p>
+    <div class="snapshot-strip">
+      <img src="./static/images/snapshots/prsq_0.jpg" alt="Press Square, predicted state 1 of 6" loading="lazy">
+      <img src="./static/images/snapshots/prsq_1.jpg" alt="Press Square, predicted state 2 of 6" loading="lazy">
+      <img src="./static/images/snapshots/prsq_2.jpg" alt="Press Square, predicted state 3 of 6" loading="lazy">
+      <img src="./static/images/snapshots/prsq_3.jpg" alt="Press Square, predicted state 4 of 6" loading="lazy">
+      <img src="./static/images/snapshots/prsq_4.jpg" alt="Press Square, predicted state 5 of 6" loading="lazy">
+      <img src="./static/images/snapshots/prsq_5.jpg" alt="Press Square, predicted state 6 of 6" loading="lazy">
+    </div>
+    <p class="snapshot-label">Press Circle</p>
+    <div class="snapshot-strip">
+      <img src="./static/images/snapshots/prci_0.jpg" alt="Press Circle, predicted state 1 of 6" loading="lazy">
+      <img src="./static/images/snapshots/prci_1.jpg" alt="Press Circle, predicted state 2 of 6" loading="lazy">
+      <img src="./static/images/snapshots/prci_2.jpg" alt="Press Circle, predicted state 3 of 6" loading="lazy">
+      <img src="./static/images/snapshots/prci_3.jpg" alt="Press Circle, predicted state 4 of 6" loading="lazy">
+      <img src="./static/images/snapshots/prci_4.jpg" alt="Press Circle, predicted state 5 of 6" loading="lazy">
+      <img src="./static/images/snapshots/prci_5.jpg" alt="Press Circle, predicted state 6 of 6" loading="lazy">
+    </div>
+    <h3 class="title is-5">Punches</h3>
+    <p class="snapshot-label">Punch Square</p>
+    <div class="snapshot-strip">
+      <img src="./static/images/snapshots/pusq_0.jpg" alt="Punch Square, predicted state 1 of 6" loading="lazy">
+      <img src="./static/images/snapshots/pusq_1.jpg" alt="Punch Square, predicted state 2 of 6" loading="lazy">
+      <img src="./static/images/snapshots/pusq_2.jpg" alt="Punch Square, predicted state 3 of 6" loading="lazy">
+      <img src="./static/images/snapshots/pusq_3.jpg" alt="Punch Square, predicted state 4 of 6" loading="lazy">
+      <img src="./static/images/snapshots/pusq_4.jpg" alt="Punch Square, predicted state 5 of 6" loading="lazy">
+      <img src="./static/images/snapshots/pusq_5.jpg" alt="Punch Square, predicted state 6 of 6" loading="lazy">
+    </div>
+    <p class="snapshot-label">Punch Circle</p>
+    <div class="snapshot-strip">
+      <img src="./static/images/snapshots/puci_0.jpg" alt="Punch Circle, predicted state 1 of 6" loading="lazy">
+      <img src="./static/images/snapshots/puci_1.jpg" alt="Punch Circle, predicted state 2 of 6" loading="lazy">
+      <img src="./static/images/snapshots/puci_2.jpg" alt="Punch Circle, predicted state 3 of 6" loading="lazy">
+      <img src="./static/images/snapshots/puci_3.jpg" alt="Punch Circle, predicted state 4 of 6" loading="lazy">
+      <img src="./static/images/snapshots/puci_4.jpg" alt="Punch Circle, predicted state 5 of 6" loading="lazy">
+      <img src="./static/images/snapshots/puci_5.jpg" alt="Punch Circle, predicted state 6 of 6" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<section class="section" id="comparison">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3">Comparison on unseen tools</h2>
+    <div class="content has-text-justified">
+      <p>Each rollout uses a tool the model never saw: models are trained on one of two complementary splits of the nine tools and evaluated on the other. Left to right: ground truth (green), RoboCook, EMPM (a differentiable material point method fit to the same data), and ours. These are selected rollouts, one per interaction mode.</p>
+    </div>
+        <h3 class="title is-5">Gripper</h3>
+        <div class="columns is-centered is-variable is-2">
+          <div class="column">
+            <video autoplay muted loop playsinline src="./static/videos/compare/gripper.mp4"></video>
+          </div>
+        </div>
+        <h3 class="title is-5">Roller</h3>
+        <div class="columns is-centered is-variable is-2">
+          <div class="column">
+            <video autoplay muted loop playsinline src="./static/videos/compare/roller.mp4"></video>
+          </div>
+        </div>
+        <h3 class="title is-5">Press <span class="has-text-grey is-size-6">(side view)</span></h3>
+        <div class="columns is-centered is-variable is-2">
+          <div class="column">
+            <video autoplay muted loop playsinline src="./static/videos/compare/press.mp4"></video>
+          </div>
+        </div>
+  </div>
+</section>
+
+<section class="section" id="new-geometries">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3">Zero-shot generalization to new tool geometries</h2>
+    <div class="content has-text-justified">
+      <p>Tool configurations absent from the training data. The model was trained with two plate grippers and is rolled out with three (at 120&deg;) and four (at 90&deg;), which press the dough into the polygon they bound. A ring press and a knife are entirely new shapes. These tools were never recorded on the robot, so there is no ground truth and the rollouts can only be judged qualitatively.</p>
+    </div>
+        <div class="columns is-centered is-variable is-2">
+          <div class="column">
+            <video autoplay muted loop playsinline src="./static/videos/unseen/gripper3.mp4"></video>
+            <p class="video-label">Three plate grippers</p>
+          </div>
+          <div class="column">
+            <video autoplay muted loop playsinline src="./static/videos/unseen/gripper4.mp4"></video>
+            <p class="video-label">Four plate grippers</p>
+          </div>
+        </div>
+        <div class="columns is-centered is-variable is-2">
+          <div class="column">
+            <video autoplay muted loop playsinline src="./static/videos/unseen/ring_press.mp4"></video>
+            <p class="video-label">Ring press</p>
+          </div>
+          <div class="column">
+            <video autoplay muted loop playsinline src="./static/videos/unseen/knife.mp4"></video>
+            <p class="video-label">Knife</p>
+          </div>
+        </div>
+  </div>
+</section>
+
+<section class="section" id="tool-design">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3">Tool shape design</h2>
+    <div class="content has-text-justified">
+      <p>A gripper plate is inflated by 100% and then optimized by gradient descent through the learned model, so that the dough it produces matches the goal dough from the original trajectory. The surface that touches the dough recovers most of the inflation.</p>
+    </div>
+        <div class="columns is-centered is-variable is-2">
+          <div class="column">
+            <video autoplay muted loop playsinline src="./static/videos/design/evolution.mp4"></video>
+            <p class="video-label">Perspective view</p>
+          </div>
+          <div class="column">
+            <video autoplay muted loop playsinline src="./static/videos/design/evolution_topdown.mp4"></video>
+            <p class="video-label">Top-down view</p>
+          </div>
+        </div>
+  </div>
+</section>
+
+<section class="section" id="planning">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3">Gradient-based vs. sampling-based planning</h2>
+    <div class="content has-text-justified">
+      <p>Refining the trajectories of four grippers so that the dough matches a target shape. Gradient descent through our model (left) is compared with the cross-entropy method (CEM, 64 samples per iteration) on the same model (right); the overlay shows the optimizer iteration.</p>
+    </div>
+        <div class="columns is-centered is-variable is-2">
+          <div class="column">
+            <video autoplay muted loop playsinline src="./static/videos/planning/gradient.mp4"></video>
+            <p class="video-label">Gradient (ours)</p>
+          </div>
+          <div class="column">
+            <video autoplay muted loop playsinline src="./static/videos/planning/cem.mp4"></video>
+            <p class="video-label">CEM</p>
+          </div>
+        </div>
+  </div>
+</section>
+
+<section class="section" id="quantitative">
+  <div class="container is-max-desktop">
+    <details>
+      <summary class="title is-3">Quantitative results</summary>
+    <!-- Quantitative results. -->
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <div class="content">
+          <p>All errors in millimetres, lower is better: Chamfer Distance (CD), Earth Mover's
+            Distance (EMD), and signed-distance penetration of dough into the tool (SDF).
+            We compare against <a href="https://arxiv.org/abs/2306.14447">RoboCook</a>
+            (Shi et al., 2023), modified to train a single model on all tools.</p>
+
+          <h3 class="title is-5">In-distribution effect of multi-tool training</h3>
+          <table class="table is-bordered is-striped is-narrow is-fullwidth">
+            <thead>
+              <tr><th>Model</th><th>Training scope</th><th>CD &darr;</th><th>EMD &darr;</th><th>SDF &darr;</th></tr>
+            </thead>
+            <tbody>
+              <tr><td rowspan="3">RoboCook</td><td>Target tool only</td><td>5.39<small>&nbsp;&plusmn;&nbsp;0.02</small></td><td>3.85<small>&nbsp;&plusmn;&nbsp;0.06</small></td><td>1.85<small>&nbsp;&plusmn;&nbsp;0.41</small></td></tr>
+              <tr><td>Tool family</td><td>5.35<small>&nbsp;&plusmn;&nbsp;0.02</small></td><td>3.77<small>&nbsp;&plusmn;&nbsp;0.06</small></td><td>0.91<small>&nbsp;&plusmn;&nbsp;0.14</small></td></tr>
+              <tr><td>All 9 tools</td><td>5.30<small>&nbsp;&plusmn;&nbsp;0.02</small></td><td>3.68<small>&nbsp;&plusmn;&nbsp;0.06</small></td><td>1.18<small>&nbsp;&plusmn;&nbsp;0.32</small></td></tr>
+              <tr><td rowspan="3"><b>Ours</b></td><td>Target tool only</td><td>5.28<small>&nbsp;&plusmn;&nbsp;0.03</small></td><td>3.74<small>&nbsp;&plusmn;&nbsp;0.04</small></td><td>0.15<small>&nbsp;&plusmn;&nbsp;0.12</small></td></tr>
+              <tr><td>Tool family</td><td>5.25<small>&nbsp;&plusmn;&nbsp;0.03</small></td><td>3.67<small>&nbsp;&plusmn;&nbsp;0.04</small></td><td>0.14<small>&nbsp;&plusmn;&nbsp;0.11</small></td></tr>
+              <tr><td>All 9 tools</td><td><b>5.20</b><small>&nbsp;&plusmn;&nbsp;0.03</small></td><td><b>3.58</b><small>&nbsp;&plusmn;&nbsp;0.02</small></td><td><b>0.11</b><small>&nbsp;&plusmn;&nbsp;0.05</small></td></tr>
+            </tbody>
+          </table>
+          <p>Averaged over 30 held-out rollouts per tool; bold is best overall. Each tool is scored
+            on its own held-out rollouts after training on that tool alone, on its interaction
+            family, or on all nine tools.</p>
+
+          <h3 class="title is-5">Zero-shot transfer to unseen tools</h3>
+          <table class="table is-bordered is-striped is-narrow is-fullwidth">
+            <thead>
+              <tr><th>Model</th><th>CD &darr;</th><th>EMD &darr;</th><th>SDF &darr;</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>RoboCook</td><td>5.68<small>&nbsp;&plusmn;&nbsp;0.01</small></td><td>4.26<small>&nbsp;&plusmn;&nbsp;0.03</small></td><td>3.33<small>&nbsp;&plusmn;&nbsp;0.38</small></td></tr>
+              <tr><td>RoboCook + our losses</td><td>5.66<small>&nbsp;&plusmn;&nbsp;0.01</small></td><td>4.26<small>&nbsp;&plusmn;&nbsp;0.02</small></td><td>1.13<small>&nbsp;&plusmn;&nbsp;0.27</small></td></tr>
+              <tr><td><b>Ours</b></td><td><b>5.46</b><small>&nbsp;&plusmn;&nbsp;0.01</small></td><td><b>3.96</b><small>&nbsp;&plusmn;&nbsp;0.03</small></td><td><b>0.63</b><small>&nbsp;&plusmn;&nbsp;0.34</small></td></tr>
+            </tbody>
+          </table>
+          <p>Models are trained on two complementary splits of the nine tools, each spanning all
+            three interaction modes, so every tool is held out exactly once. Averaged over
+            &sim;250 held-out rollouts per tool; intervals are 95% bootstrap over rollouts.</p>
+
+          <h3 class="title is-5">Which components support out-of-distribution generalization</h3>
+          <table class="table is-bordered is-striped is-narrow is-fullwidth">
+            <thead>
+              <tr><th>Model</th><th>CD &darr;</th><th>EMD &darr;</th><th>SDF &darr;</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>RoboCook</td><td>6.56<small>&nbsp;&plusmn;&nbsp;0.03</small></td><td>5.45<small>&nbsp;&plusmn;&nbsp;0.06</small></td><td>5.11<small>&nbsp;&plusmn;&nbsp;0.83</small></td></tr>
+              <tr><td>RoboCook + our losses</td><td>6.52<small>&nbsp;&plusmn;&nbsp;0.02</small></td><td>5.46<small>&nbsp;&plusmn;&nbsp;0.06</small></td><td>1.17<small>&nbsp;&plusmn;&nbsp;0.55</small></td></tr>
+              <tr><td><b>Ours</b></td><td><b>6.10</b><small>&nbsp;&plusmn;&nbsp;0.04</small></td><td><b>4.78</b><small>&nbsp;&plusmn;&nbsp;0.05</small></td><td><b>0.32</b><small>&nbsp;&plusmn;&nbsp;0.07</small></td></tr>
+              <tr><td colspan="4"><em>Component removals from Ours</em></td></tr>
+              <tr><td>&nbsp;&nbsp;&minus; heading representation</td><td><u>6.27</u><small>&nbsp;&plusmn;&nbsp;0.05</small></td><td><u>5.20</u><small>&nbsp;&plusmn;&nbsp;0.07</small></td><td>0.37<small>&nbsp;&plusmn;&nbsp;0.05</small></td></tr>
+              <tr><td>&nbsp;&nbsp;&minus; tool discretization</td><td>6.22<small>&nbsp;&plusmn;&nbsp;0.01</small></td><td>4.83<small>&nbsp;&plusmn;&nbsp;0.02</small></td><td>0.37<small>&nbsp;&plusmn;&nbsp;0.19</small></td></tr>
+              <tr><td>&nbsp;&nbsp;&minus; geometry cues</td><td>6.26<small>&nbsp;&plusmn;&nbsp;0.04</small></td><td>4.93<small>&nbsp;&plusmn;&nbsp;0.06</small></td><td><u>1.35</u><small>&nbsp;&plusmn;&nbsp;0.75</small></td></tr>
+            </tbody>
+          </table>
+          <p>Scored on the three held-out grippers, all 837 of their trajectories; intervals are
+            95% bootstrap over rollouts. Bold marks our full model, underline the costliest
+            removal per metric. SDF gaps under 0.3&nbsp;mm are within seed variation.</p>
+
+          <h3 class="title is-5">Robustness to tool sampling density</h3>
+          <table class="table is-bordered is-striped is-narrow is-fullwidth">
+            <thead>
+              <tr><th>Model</th><th>0.25&times;</th><th>0.5&times;</th><th>1&times;</th><th>2&times;</th><th>4&times;</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>RoboCook</td><td>5.73</td><td>5.60</td><td>5.59</td><td>5.71</td><td>9.56</td></tr>
+              <tr><td>+ <em>z</em>-equivariance</td><td>5.58</td><td>5.48</td><td><b>5.45</b></td><td>5.62</td><td>13.42</td></tr>
+              <tr><td>+ split aggregation</td><td>5.59</td><td>5.57</td><td>5.57</td><td>5.56</td><td>5.56</td></tr>
+              <tr><td><b>Ours</b></td><td><b>5.50</b></td><td><b>5.47</b></td><td><b>5.45</b></td><td><b>5.44</b></td><td><b>5.44</b></td></tr>
+            </tbody>
+          </table>
+          <p>Chamfer Distance (mm) with every tool resampled from 0.25&times; to 4&times; the
+            training point-cloud density (1&times;). Bold is best per column.</p>
+
+          <h3 class="title is-5">Comparison against EMPM, a differentiable MPM</h3>
+          <div class="has-text-centered">
+            <img src="./static/images/empm_accuracy.png"
+                 alt="Bar charts of point-to-mesh error in millimetres for grippers, rollers and presses: ours is lower than EMPM for every family"
+                 style="width: 100%; max-width: 640px;">
+          </div>
+          <p>Point-to-mesh error: the mean distance from each predicted surface point to the
+            ground-truth mesh at the final frame. 30 held-out rollouts per tool; error bars are the
+            standard error over rollouts. Ours is the nine-tool model; EMPM runs at a 2&nbsp;mm grid
+            with its material identified on the same training data.</p>
+          <table class="table is-bordered is-striped is-narrow is-fullwidth">
+            <thead>
+              <tr><th>Method</th><th>Per-candidate rollout cost</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>EMPM</td><td>512.4&nbsp;ms</td></tr>
+              <tr><td>Ours (batch 1)</td><td>33.4&nbsp;ms</td></tr>
+              <tr><td><b>Ours (batch 256)</b></td><td><b>6.93&nbsp;ms</b></td></tr>
+            </tbody>
+          </table>
+          <p>Pooled over all nine tools. EMPM runs one sequential rollout per candidate, while our
+            model batches all candidates into a single forward pass.</p>
+        </div>
+      </div>
+    </div>
+    <!--/ Quantitative results. -->
+    </details>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content has-text-centered">
+          <p>
+            Page built with the <a href="https://github.com/nerfies/nerfies.github.io">Nerfies project
+            page template</a>, licensed under a <a rel="license"
+            href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons
+            Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
